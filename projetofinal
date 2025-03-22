@@ -1,0 +1,223 @@
+#include <stdio.h>  //funções de entrada e saída
+#include <stdlib.h>  //funções de alocação de memória
+#include <string.h>  //funções de comparação de strings
+
+// Local onde serão armazenados os dados
+char arquivo[20] = "arquivo.txt"; 
+
+//definição da estrutura de produto, o typedef simplifica a construção da estrutura
+typedef struct {
+    char nome[20];
+    float preco;
+    int qntd;
+} Produto;
+
+void cadastrar(char nome[20], float preco, int qntd) {
+    FILE *f = fopen(arquivo, "a"); //abre e acrescenta dados no final
+    if (f == NULL) {
+        printf("Erro ao cadastrar produto, tente novamente.\n");
+        return;
+    }
+    fprintf(f, "%s %.2f %i\n", nome, preco, qntd);
+    fclose(f); //fecha arquivo
+    printf("Produto cadastrado com sucesso!\n");
+}
+
+void atualizar_qntd(char nome[20], int nova_qntd) {
+    FILE *f = fopen(arquivo, "r"); //abre somente para leitura
+    FILE *novo_arquivo = fopen("novo_arquivo.txt", "w"); //função que faz ser atualizado
+    if (f == NULL || novo_arquivo == NULL) {
+        printf("Erro ao atualizar a quantidade, tente novamente.\n");
+        return;
+    }
+
+    Produto p; //variável temporária para armazenar as infos lidas no arquivo
+    int encontrado = 0; //se o produto for encontrado muda para 1
+    //o laço vai continuar até todas as linhas serem lidas (EOF))
+    while (fscanf(f, "%s %f %i", p.nome, &p.preco, &p.qntd) != EOF) { //p.nome não tem & pois em string o ponteiro é a própria variável
+        if (strcmp(p.nome, nome) == 0) { //compara o nome atual com o anterior
+            p.qntd = nova_qntd;
+            encontrado = 1; //indica que foi encontrado e atualizado
+        }
+        //reescreve os dados do produto no novo arquivo mesmo que não seja encontrado pois a função é atualizar e não excluir
+        fprintf(novo_arquivo, "%s %.2f %i\n", p.nome, p.preco, p.qntd);
+    }
+
+    fclose(f);
+    fclose(novo_arquivo);
+
+    remove(arquivo);
+    rename("novo_arquivo.txt", arquivo);
+
+    if (encontrado)
+        printf("Quantidade atualizada com sucesso!\n");
+    else
+        printf("Produto não encontrado, verifique se escreveu corretamente.\n");
+}
+
+void atualizar_preco(char produto[20], float novo_preco) {
+    FILE *f = fopen(arquivo, "r");
+    FILE *novo_arquivo = fopen("novo_arquivo.txt", "w");
+    if (f == NULL || novo_arquivo == NULL) {
+        printf("Erro ao atualizar o preço, tente novamente.\n");
+        return;
+    }
+
+    Produto p;
+    int encontrado = 0;
+    while (fscanf(f, "%s %f %i", p.nome, &p.preco, &p.qntd) != EOF) {
+        if (strcmp(p.nome, produto) == 0) {
+            p.preco = novo_preco;
+            encontrado = 1;
+        }
+        fprintf(novo_arquivo, "%s %.2f %i\n", p.nome, p.preco, p.qntd);
+    }
+
+    fclose(f);
+    fclose(novo_arquivo);
+
+    remove(arquivo);
+    rename("novo_arquivo.txt", arquivo);
+
+    if (encontrado)
+        printf("Preço atualizado com sucesso!\n");
+    else
+        printf("Produto não encontrado.\n");
+}
+
+void excluir(char nome[20]) {
+    FILE *f = fopen(arquivo, "r");
+    FILE *novo_arquivo = fopen("novo_arquivo.txt", "w");
+    if (f == NULL || novo_arquivo == NULL) {
+        printf("Erro ao excluir o produto, tente novamente.\n");
+        return;
+    }
+
+    Produto p;
+    int encontrado = 0;
+    while (fscanf(f, "%s %f %i", p.nome, &p.preco, &p.qntd) != EOF) {
+        if (strcmp(p.nome, nome) != 0) {
+            fprintf(novo_arquivo, "%s %.2f %i\n", p.nome, p.preco, p.qntd);
+        } else {
+            encontrado = 1;
+        }
+    }
+
+    fclose(f);
+    fclose(novo_arquivo);
+
+    remove(arquivo);
+    rename("novo_arquivo.txt", arquivo);
+
+    if (encontrado)
+        printf("Produto excluído com sucesso!\n");
+    else
+        printf("Produto não encontrado.\n");
+}
+
+void exibir_estoque() {
+    FILE *f = fopen(arquivo, "r");
+    if (f == NULL) {
+        printf("Erro ao exibir o estoque, tente novamente.\n");
+        return;
+    }
+
+    Produto p;
+    printf("\n=== Estoque Atual ===\n");
+    while (fscanf(f, "%s %f %i", p.nome, &p.preco, &p.qntd) != EOF) {
+        printf("Produto: %s | Preço: R$%.2f | Quantidade: %i\n", p.nome, p.preco, p.qntd);
+    }
+
+    fclose(f);
+}
+
+void menu() {
+    printf("\n==== Papelaria Preço Baixo ====\n");
+    printf("1 - Cadastrar produto\n");
+    printf("2 - Atualizar quantidade\n");
+    printf("3 - Atualizar preço\n");
+    printf("4 - Excluir produto\n");
+    printf("5 - Exibir estoque atual\n");
+    printf("6 - Sair\n");
+    printf("Escolha uma opção: ");
+}
+
+int main() {
+    int opcao; //armazena a opção escolhida pelo usuário
+    char nome[20];
+    float preco;
+    int qntd;
+
+    do {
+        menu(); 
+        if (scanf("%i", &opcao) != 1) { //verificar se o scanf leu um inteiro
+            printf("Entrada inválida! Tente novamente.\n");
+            continue;
+        }
+
+        switch (opcao) {
+            case 1:
+                printf("Digite o nome do produto: \n");
+                fgets(nome, sizeof(nome), stdin);
+                
+                
+                printf("Digite o preço do produto: R$\n");
+                if (scanf("%f", &preco) != 1) {
+                    printf("Preço inválido! Tente novamente.\n");
+                    break;
+                }
+                
+                printf("Digite a quantidade do produto: \n");
+                if (scanf("%i", &qntd) != 1) {
+                    printf("Quantidade inválida! Tente novamente.\n");
+                    break;
+                }
+                cadastrar(nome, preco, qntd);
+                break;
+
+            case 2:
+                printf("Nome do produto para atualizar a quantidade: \n");
+                fgets(nome, sizeof(nome), stdin);
+                nome[strcspn(nome, "\n")] = 0;
+                printf("Nova quantidade: \n");
+                if (scanf("%i", &qntd) != 1) {
+                    printf("Quantidade inválida! Tente novamente.\n");
+                    break;
+                }
+                atualizar_qntd(nome, qntd);
+                break;
+
+            case 3:
+                printf("Digite o nome do produto para atualizar o preço: \n");
+                fgets(nome, sizeof(nome), stdin);
+                nome[strcspn(nome, "\n")] = 0;
+                printf("Novo preço: R$ \n");
+                if (scanf("%f", &preco) != 1) {
+                    printf("Preço inválido! Tente novamente.\n");
+                    break;
+                }
+                atualizar_preco(nome, preco);
+                break;
+
+            case 4:
+                printf("Digite o nome do produto para excluir: \n");
+                fgets(nome, sizeof(nome), stdin);
+                nome[strcspn(nome, "\n")] = 0;
+                excluir(nome);
+                break;
+
+            case 5:
+                exibir_estoque();
+                break;
+
+            case 6:
+                printf("Sistema de estoque encerrado.\n");
+                break;
+
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+        }
+    } while (opcao != 6); 
+
+    return 0;
+}
