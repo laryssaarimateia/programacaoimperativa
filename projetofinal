@@ -14,7 +14,7 @@ typedef struct {
 
 void cadastrar(char nome[20], float preco, int qntd) {
     FILE *f = fopen(arquivo, "a"); //abre e acrescenta dados no final
-    if (f == NULL) {
+    if (f == NULL) { //f é um ponteiro e não uma variável
         printf("Erro ao cadastrar produto, tente novamente.\n");
         return;
     }
@@ -59,7 +59,7 @@ void atualizar_preco(char produto[20], float novo_preco) {
     FILE *f = fopen(arquivo, "r");
     FILE *novo_arquivo = fopen("novo_arquivo.txt", "w");
     if (f == NULL || novo_arquivo == NULL) {
-        printf("Erro ao atualizar o preço, tente novamente.\n");
+        printf("Erro ao atualizar o preco, tente novamente.\n");
         return;
     }
 
@@ -80,9 +80,9 @@ void atualizar_preco(char produto[20], float novo_preco) {
     rename("novo_arquivo.txt", arquivo);
 
     if (encontrado)
-        printf("Preço atualizado com sucesso!\n");
+        printf("Preco atualizado com sucesso!\n");
     else
-        printf("Produto não encontrado.\n");
+        printf("Produto nao encontrado.\n");
 }
 
 void excluir(char nome[20]) {
@@ -110,9 +110,9 @@ void excluir(char nome[20]) {
     rename("novo_arquivo.txt", arquivo);
 
     if (encontrado)
-        printf("Produto excluído com sucesso!\n");
+        printf("Produto excluido com sucesso!\n");
     else
-        printf("Produto não encontrado.\n");
+        printf("Produto nao encontrado.\n");
 }
 
 void exibir_estoque() {
@@ -125,22 +125,29 @@ void exibir_estoque() {
     Produto p;
     printf("\n=== Estoque Atual ===\n");
     while (fscanf(f, "%s %f %i", p.nome, &p.preco, &p.qntd) != EOF) {
-        printf("Produto: %s | Preço: R$%.2f | Quantidade: %i\n", p.nome, p.preco, p.qntd);
+        printf("Produto: %s | Preco: R$%.2f | Quantidade: %i\n", p.nome, p.preco, p.qntd);
     }
 
     fclose(f);
 }
 
 void menu() {
-    printf("\n==== Papelaria Preço Baixo ====\n");
+    printf("\n==== Papelaria Preco Baixo ====\n");
     printf("1 - Cadastrar produto\n");
     printf("2 - Atualizar quantidade\n");
-    printf("3 - Atualizar preço\n");
+    printf("3 - Atualizar preco\n");
     printf("4 - Excluir produto\n");
     printf("5 - Exibir estoque atual\n");
     printf("6 - Sair\n");
-    printf("Escolha uma opção: ");
+    printf("Escolha uma opcao: ");
 }
+
+void clear(){
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF){
+    };
+                    
+    }
 
 int main() {
     int opcao; //armazena a opção escolhida pelo usuário
@@ -151,23 +158,25 @@ int main() {
     do {
         menu(); 
         if (scanf("%i", &opcao) != 1) { //verificar se o scanf leu um inteiro
-            printf("Entrada inválida! Tente novamente.\n");
+            printf("Entrada invalida! Tente novamente.\n");
             continue;
         }
 
         switch (opcao) {
             case 1:
-                printf("Digite o nome do produto: \n");
+                printf("Digite o nome do produto: ");
+                clear();
                 fgets(nome, sizeof(nome), stdin);
+                nome[strcspn(nome, "\n")] = '\0';
                 
                 
-                printf("Digite o preço do produto: R$\n");
+                printf("Digite o preco do produto: R$");
                 if (scanf("%f", &preco) != 1) {
-                    printf("Preço inválido! Tente novamente.\n");
+                    printf("Preco inválido! Tente novamente.\n");
                     break;
                 }
                 
-                printf("Digite a quantidade do produto: \n");
+                printf("Digite a quantidade do produto:");
                 if (scanf("%i", &qntd) != 1) {
                     printf("Quantidade inválida! Tente novamente.\n");
                     break;
@@ -176,10 +185,12 @@ int main() {
                 break;
 
             case 2:
-                printf("Nome do produto para atualizar a quantidade: \n");
+                printf("Nome do produto para atualizar a quantidade: ");
+                clear();
                 fgets(nome, sizeof(nome), stdin);
-                nome[strcspn(nome, "\n")] = 0;
-                printf("Nova quantidade: \n");
+                nome[strcspn(nome, "\n")] = '\0';
+                
+                printf("Nova quantidade: ");
                 if (scanf("%i", &qntd) != 1) {
                     printf("Quantidade inválida! Tente novamente.\n");
                     break;
@@ -188,21 +199,25 @@ int main() {
                 break;
 
             case 3:
-                printf("Digite o nome do produto para atualizar o preço: \n");
+                printf("Digite o nome do produto para atualizar o preco: ");
+                clear();
                 fgets(nome, sizeof(nome), stdin);
-                nome[strcspn(nome, "\n")] = 0;
-                printf("Novo preço: R$ \n");
+                nome[strcspn(nome, "\n")] = '\0';
+
+                printf("Novo preco: R$");
                 if (scanf("%f", &preco) != 1) {
-                    printf("Preço inválido! Tente novamente.\n");
+                    printf("Preco inválido! Tente novamente.\n");
                     break;
                 }
                 atualizar_preco(nome, preco);
                 break;
 
             case 4:
-                printf("Digite o nome do produto para excluir: \n");
+                printf("Digite o nome do produto para excluir: ");
+                clear();
                 fgets(nome, sizeof(nome), stdin);
-                nome[strcspn(nome, "\n")] = 0;
+                nome[strcspn(nome, "\n")] = '\0';
+
                 excluir(nome);
                 break;
 
@@ -215,9 +230,10 @@ int main() {
                 break;
 
             default:
-                printf("Opção inválida! Tente novamente.\n");
+                printf("Opção invalida! Tente novamente.\n");
         }
     } while (opcao != 6); 
 
     return 0;
 }
+
